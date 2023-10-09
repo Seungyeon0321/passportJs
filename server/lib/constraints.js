@@ -1,10 +1,12 @@
+//이 constrains은 하나의 schema라고 생각하면 될 듯
+
 let _ = {};
 
 _.name = () => {
-  const regex = "[A-Za-z0-9]+";
+  const regex = /[A-Za-z0-9]+/;
   const constraints = {
     presence: {
-      alowEmpty: false,
+      allowEmpty: false,
     },
     type: "string",
     format: {
@@ -13,6 +15,8 @@ _.name = () => {
       message: "name must match the format pattern",
     },
   };
+
+  // constraints 객체를 반환
   return constraints;
 };
 
@@ -24,6 +28,16 @@ _.email = () => {
   };
 
   return constraints;
+};
+
+_.password = () => {
+  const constraints = {
+    presence: { allowEmpty: false },
+    type: "string",
+    length: {
+      minimum: 10,
+    },
+  };
 };
 
 module.exports = _;
