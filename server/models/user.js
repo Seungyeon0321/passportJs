@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
 const validate = require("validate.js");
 const constraints = require("../lib/constraints");
+const db = require("../lib/db");
 
 let _ = class User {
   constructor() {
@@ -20,7 +21,8 @@ let _ = class User {
   }
 
   // Save the user to the database
-  save() {
+  save(data) {
+    db.write(data);
     console.log(`Successfully saved user ${this.id} to the database`);
   }
 
@@ -38,7 +40,6 @@ let _ = class User {
 
       // validate the input from
       let msg = validate.single(firstName, constraints.name);
-      console.log(msg);
       if (msg) {
         return msg;
       } else {
@@ -61,7 +62,7 @@ let _ = class User {
 
       // validate the input from
       let msg = validate.single(lastName, constraints.name);
-      console.log(msg);
+
       //msg가 있는 것 자체로 someting wrong이다
       if (msg) {
         return msg;
@@ -90,6 +91,7 @@ let _ = class User {
     }
   }
 
+  //10자리를 password를 hashing 해야하기 때문에 async로 해야한다
   async setPassword(password) {
     try {
       let msg = validate.single(password, constraints.password);

@@ -2,6 +2,7 @@
 
 const express = require("express");
 const User = require("../models/user");
+const passport = require("passport");
 
 let _ = express.Router();
 
@@ -58,7 +59,7 @@ _.post("/register", async (req, res) => {
 
     //save this user to the db
 
-    user.save();
+    user.save(req.body);
 
     res.status(200).json(user);
 
@@ -69,16 +70,50 @@ _.post("/register", async (req, res) => {
 });
 
 // Post /Login
-_.post("/login", async (req, res) => {
-  try {
-    res.status(200).json({
-      timestamp: Date.now(),
-      message: "Logged in successfully",
-      code: 200,
+// _.post("/login", async (req, res) => {
+//   try {
+//     res.status(200).json({
+//       timestamp: Date.now(),
+//       message: "Logged in successfully",
+//       code: 200,
+//     });
+//   } catch (e) {
+//     throw new Error(e);
+//   }
+// });
+
+_.post("/login", (req, res, next) => {
+  console.log(`1 - login handler ${JSON.stringify(req.body)}`);
+  passport.authenticate("local", (err, user) => {
+    console.log("3라우터유저", `${JSON.stringify(user)}`);
+    // 이 안에다가 우리가 validate할 녀석을 넣어줘야 한다, 해당 조건이 클리어 할 경우
+    // status 200을 return하는 것을 이 함수의 목적으로 한다
+
+    //password가 matching하지 않았을 때 발생되는 에러 메세지가 들어가야한다
+    if (err) {
+      return res.status(401).json({
+        timestamp: Date.now(),
+        msg: `Access denied. Username or password is incorrect`,
+        data: 401,
+      });
+    }
+    if (!user) {
+      return res.status(401).json({
+        timestamp: Date.now(),
+        msg: `Unauthorized user`,
+        code: 401,
+      });
+    }
+
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).json({
+        redirectTo: "/profile",
+      });
     });
-  } catch (e) {
-    throw new Error(e);
-  }
+  })(req, res, next);
 });
 
 _.post("/logout", async (req, res) => {
